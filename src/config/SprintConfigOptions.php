@@ -88,6 +88,23 @@ final class SprintConfigOptions
                 pht(
                     "The Sprint Board is optional".
                     "\n\n.")),
+        $this->newOption('sprint.enable-phragile', 'bool', false)
+            ->setBoolOptions(
+                array(
+                    pht('Enable Phragile'),
+                    pht('Disble Phragile'),
+                ))
+            ->setSummary(pht('Enable or Disable Phragile Extension.'))
+            ->setDescription(
+                pht(
+                    "Phragile charts are provided by an external application at https://phragile.wmflabs.org".
+                    "\n\n.")),
+        $this->newOption('sprint.phragile-uri', 'string', 'https://phragile.wmflabs.org/sprints/')
+            ->setSummary(pht('URI where Phragile is installed.'))
+            ->setDescription(
+                pht(
+                    'Set the URI where Phragile is installed.'))
+            ->addExample('https://phragile.wmflabs.org/sprints/', pht('Valid Setting')),
     );
   }
 

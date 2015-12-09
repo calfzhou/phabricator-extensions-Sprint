@@ -3,17 +3,10 @@
 final class SprintBoardColumnDetailController
   extends SprintBoardController {
 
-  private $id;
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -21,7 +14,7 @@ final class SprintBoardColumnDetailController
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->needImages(true)
       ->executeOne();
 
@@ -32,7 +25,7 @@ final class SprintBoardColumnDetailController
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -47,7 +40,7 @@ final class SprintBoardColumnDetailController
       new PhabricatorProjectColumnTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $title = pht('%s', $column->getDisplayName());
+    $title = $column->getDisplayName();
 
     $header = $this->buildHeaderView($column);
     $actions = $this->buildActionView($column);
@@ -119,15 +112,6 @@ final class SprintBoardColumnDetailController
       ->setUser($viewer)
       ->setObject($column)
       ->setActionList($actions);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $column);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
 
     $limit = $column->getPointLimit();
     $properties->addProperty(
